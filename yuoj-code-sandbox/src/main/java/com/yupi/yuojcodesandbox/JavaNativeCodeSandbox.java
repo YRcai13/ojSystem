@@ -8,12 +8,9 @@ import com.yupi.yuojcodesandbox.model.ExecuteCodeResponse;
 import com.yupi.yuojcodesandbox.model.ExecuteMessage;
 import com.yupi.yuojcodesandbox.model.JudgeInfo;
 import com.yupi.yuojcodesandbox.utils.ProcessUtils;
-import org.springframework.util.ResourceUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,8 +61,8 @@ public class JavaNativeCodeSandbox implements CodeSandbox{
 			String runCmd = String.format("java -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
 			try {
 				Process runProcess = Runtime.getRuntime().exec(runCmd);
-				ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(runProcess, "运行");
 //				ExecuteMessage executeMessage = ProcessUtils.runInteractProcessAndGetMessage(runProcess, "运行", inputArgs);
+				ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(runProcess, "运行");
 				System.out.println(executeMessage);
 				executeMessageList.add(executeMessage);
 			} catch (IOException e) {
@@ -123,7 +120,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox{
 	
 	public static void main(String[] args) {
 		ExecuteCodeRequest executeCodeRequest = new ExecuteCodeRequest();
-		String code = ResourceUtil.readStr("testCode.simpleComputeArgs/Main.java", StandardCharsets.UTF_8);
+		String code = ResourceUtil.readStr("testCode/unsafeCode/SleepError.java", StandardCharsets.UTF_8);
 		executeCodeRequest.setInputList(Arrays.asList("1 2", "1 3", "6 9"));
 		executeCodeRequest.setCode(code);
 		executeCodeRequest.setLanguage("java");
