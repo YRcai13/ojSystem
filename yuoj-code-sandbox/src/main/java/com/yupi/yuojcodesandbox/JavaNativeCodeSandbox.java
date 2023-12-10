@@ -3,10 +3,13 @@ package com.yupi.yuojcodesandbox;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.dfa.FoundWord;
+import cn.hutool.dfa.WordTree;
 import com.yupi.yuojcodesandbox.model.ExecuteCodeRequest;
 import com.yupi.yuojcodesandbox.model.ExecuteCodeResponse;
 import com.yupi.yuojcodesandbox.model.ExecuteMessage;
 import com.yupi.yuojcodesandbox.model.JudgeInfo;
+import com.yupi.yuojcodesandbox.security.MySecurityManager;
 import com.yupi.yuojcodesandbox.utils.ProcessUtils;
 
 import java.io.File;
@@ -29,12 +32,35 @@ public class JavaNativeCodeSandbox implements CodeSandbox{
 
 	private static final String GLOBAL_JAVA_CLASS_NAME = "Main.java";
 
+	private static final long TIME_OUT = 10000L;
+
+	private static final String SECURITY_MANAGER_PATH = "D:\\workplace\\OJ项目\\yuoj-code-sandbox\\src\\main\\resources\\security";
+
+	private static final String SECURITY_MANAGER_NAME = "MySecurityManager";
+
+	private static final List<String> blackList = Arrays.asList("Files", "exec");
+
+	// 字典树结构
+	private static final WordTree WORD_TREE;
+
+	static {
+		WORD_TREE = new WordTree();
+		WORD_TREE.addWords(blackList);
+	}
+
 	@Override
 	public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
 		// 1、读取用户代码
 		List<String> inputList = executeCodeRequest.getInputList();
 		String code = executeCodeRequest.getCode();
 		String language = executeCodeRequest.getLanguage();
+
+//		FoundWord foundWord = WORD_TREE.matchWord(code);
+//		if (foundWord != null) {
+//			System.out.println("包含禁止词" + foundWord.getFoundWord());
+//			return null;
+//		}
+
 		String userDir = System.getProperty("user.dir");
 		String globalPath = userDir + File.separator + GLOBAL_CODE_DIR_NAME;
 		if (!FileUtil.exist(globalPath)) {
@@ -56,11 +82,21 @@ public class JavaNativeCodeSandbox implements CodeSandbox{
 		}
 
 		// 3、执行代码，得到输出结果
+//		System.setSecurityManager(new MySecurityManager());
 		List<ExecuteMessage> executeMessageList = new ArrayList<>();
 		for (String inputArgs : inputList) {
-			String runCmd = String.format("java -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
+			String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s;%s -Djava.security.manager=%s Main %s", userCodeParentPath, SECURITY_MANAGER_PATH, SECURITY_MANAGER_NAME,  inputArgs);
 			try {
 				Process runProcess = Runtime.getRuntime().exec(runCmd);
+				new Thread(() -> {
+					try {
+						Thread.sleep(TIME_OUT);
+						System.out.println("超时了，中断");
+						runProcess.destroy();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}).start();
 //				ExecuteMessage executeMessage = ProcessUtils.runInteractProcessAndGetMessage(runProcess, "运行", inputArgs);
 				ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(runProcess, "运行");
 				System.out.println(executeMessage);
@@ -120,7 +156,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox{
 	
 	public static void main(String[] args) {
 		ExecuteCodeRequest executeCodeRequest = new ExecuteCodeRequest();
-		String code = ResourceUtil.readStr("testCode/unsafeCode/SleepError.java", StandardCharsets.UTF_8);
+		String code = ResourceUtil.readStr("testCode/unsafeCode/RunFileError.java", StandardCharsets.UTF_8);
 		executeCodeRequest.setInputList(Arrays.asList("1 2", "1 3", "6 9"));
 		executeCodeRequest.setCode(code);
 		executeCodeRequest.setLanguage("java");

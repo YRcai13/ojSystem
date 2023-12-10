@@ -27,7 +27,7 @@ public class ProcessUtils {
 				 StringBuilder stringBuilder = new StringBuilder();
 				 String line;
 				 while ((line = bufferedReader.readLine()) != null) {
-					 stringBuilder.append(line);
+					 stringBuilder.append(line).append("\n");
 				 }
 				 executeMessage.setMessage(stringBuilder.toString());
 			 } else {	// 失败
@@ -36,14 +36,14 @@ public class ProcessUtils {
 				 StringBuilder stringBuilder = new StringBuilder();
 				 String line;
 				 while ((line = bufferedReader.readLine()) != null) {
-					 stringBuilder.append(line);
+					 stringBuilder.append(line).append("\n");
 				 }
 				 System.out.println(stringBuilder);
 				 BufferedReader errorBufferedReader = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
 				 StringBuilder errorStringBuilder = new StringBuilder();
 				 String errorLine;
 				 while ((errorLine = errorBufferedReader.readLine()) != null) {
-					 errorStringBuilder.append(errorLine);
+					 errorStringBuilder.append(errorLine).append("\n");
 				 }
 				 executeMessage.setErrorMessage(errorStringBuilder.toString());
 				 stopWatch.stop();
