@@ -119,10 +119,8 @@ public class JavaNativeCodeSandbox implements CodeSandbox{
 				break;
 			}
 			outputList.add(executeMessage.getMessage());
-			Long time = executeMessage.getTime();
-			if (time != null) {
-				maxTime = Math.max(maxTime, time);
-			}
+			long time = executeMessage.getTime();
+			maxTime = Math.max(maxTime, time);
 		}
 		if (outputList.size() == executeMessageList.size()) {
 			executeCodeResponse.setStatus(1);
@@ -156,7 +154,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox{
 	
 	public static void main(String[] args) {
 		ExecuteCodeRequest executeCodeRequest = new ExecuteCodeRequest();
-		String code = ResourceUtil.readStr("testCode/unsafeCode/RunFileError.java", StandardCharsets.UTF_8);
+		String code = ResourceUtil.readStr("testCode/unsafeCode/SleepError.java", StandardCharsets.UTF_8);
 		executeCodeRequest.setInputList(Arrays.asList("1 2", "1 3", "6 9"));
 		executeCodeRequest.setCode(code);
 		executeCodeRequest.setLanguage("java");

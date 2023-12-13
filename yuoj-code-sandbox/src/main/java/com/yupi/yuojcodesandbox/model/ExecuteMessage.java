@@ -1,6 +1,9 @@
 package com.yupi.yuojcodesandbox.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author cyr
@@ -18,4 +21,6 @@ public class ExecuteMessage {
     private String errorMessage;
 
     private long time;
+
+    private long memory;
 }

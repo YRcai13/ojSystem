@@ -4,8 +4,14 @@ public class Main {
 	public static void main(String[] args) {
 		int arg0 = Integer.parseInt(args[0]);
 		int arg1 = Integer.parseInt(args[1]);
+//		int x = 1 / 0;
 		int num = arg0 + arg1;
-		System.out.println("结果为:" + num);
+		try {
+			Thread.sleep(3000L);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		System.out.print(num);
 	}
 }
 //public class Main {
