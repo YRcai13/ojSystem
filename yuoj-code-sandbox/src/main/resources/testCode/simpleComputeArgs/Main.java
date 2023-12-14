@@ -1,17 +1,22 @@
+import java.util.Date;
 import java.util.Scanner;
 
 public class Main {
 	public static void main(String[] args) {
+//		try {
+//			Thread.sleep(3000L);
+//		} catch (InterruptedException e) {
+//			throw new RuntimeException(e);
+//		}
 		int arg0 = Integer.parseInt(args[0]);
 		int arg1 = Integer.parseInt(args[1]);
 //		int x = 1 / 0;
 		int num = arg0 + arg1;
-		try {
-			Thread.sleep(3000L);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
+//		Date date = new Date();
+//		long time = date.getTime();
 		System.out.print(num);
+//		System.out.print("time" + time);
+
 	}
 }
 //public class Main {

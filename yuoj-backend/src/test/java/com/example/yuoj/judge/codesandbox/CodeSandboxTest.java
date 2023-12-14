@@ -42,7 +42,14 @@ public class CodeSandboxTest {
 	void executeCodeProxy() {
 		CodeSandbox codeSandbox = CodeSandboxFactory.newInstance(type);
 		codeSandbox = new CodeSandboxProxy(codeSandbox);
-		String code = "int main() {}";
+		String code = "public class Main {\n" +
+				"\tpublic static void main(String[] args) {\n" +
+				"\t\tint arg0 = Integer.parseInt(args[0]);\n" +
+				"\t\tint arg1 = Integer.parseInt(args[1]);\n" +
+				"\t\tint num = arg0 + arg1;\n" +
+				"\t\tSystem.out.print(num);\n" +
+				"\t}\n" +
+				"}";
 		String language = QuestionSubmitLanguageEnum.JAVA.getValue();
 		List<String> inputList = Arrays.asList("1 2", "3 4");
 		ExecuteCodeRequest executeCodeRequest = ExecuteCodeRequest.builder()

@@ -1,5 +1,7 @@
 package com.yupi.yuojcodesandbox.controller;
 
+import java.util.Date;
+
 /**
  * @author cyr
  * @version 1.0
@@ -13,12 +15,10 @@ public class Main {
 		int arg0 = 1;
 		int arg1 = 2;
 		int num = arg0 + arg1;
-		try {
-			Thread.sleep(3000L);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
 		System.out.println("结果为:" + num);
+		Date date = new Date();
+		long time = date.getTime();
+		System.out.println("time" + time);
 	}
 }
 //public class Main {
