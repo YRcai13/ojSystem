@@ -1,28 +1,25 @@
-package com.example.yuoj.controller;
+package com.cyr.ojbackendquestionservice.controller;
 
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.yuoj.annotation.AuthCheck;
-import com.example.yuoj.common.BaseResponse;
-import com.example.yuoj.common.DeleteRequest;
-import com.example.yuoj.common.ErrorCode;
-import com.example.yuoj.common.ResultUtils;
-import com.example.yuoj.constant.UserConstant;
-import com.example.yuoj.exception.BusinessException;
-import com.example.yuoj.exception.ThrowUtils;
-import com.example.yuoj.model.dto.question.*;
-import com.example.yuoj.model.dto.question.QuestionAddRequest;
-import com.example.yuoj.model.dto.questionsubmit.QuestionSubmitAddRequest;
-import com.example.yuoj.model.dto.questionsubmit.QuestionSubmitQueryRequest;
-import com.example.yuoj.model.dto.user.UserQueryRequest;
-import com.example.yuoj.model.entity.Question;
-import com.example.yuoj.model.entity.QuestionSubmit;
-import com.example.yuoj.model.entity.User;
-import com.example.yuoj.model.vo.QuestionSubmitVO;
-import com.example.yuoj.model.vo.QuestionVO;
-import com.example.yuoj.service.QuestionService;
-import com.example.yuoj.service.QuestionSubmitService;
-import com.example.yuoj.service.UserService;
+import com.cyr.ojbackendcommon.annotation.AuthCheck;
+import com.cyr.ojbackendcommon.common.BaseResponse;
+import com.cyr.ojbackendcommon.common.DeleteRequest;
+import com.cyr.ojbackendcommon.common.ErrorCode;
+import com.cyr.ojbackendcommon.common.ResultUtils;
+import com.cyr.ojbackendcommon.constant.UserConstant;
+import com.cyr.ojbackendcommon.exception.BusinessException;
+import com.cyr.ojbackendcommon.exception.ThrowUtils;
+import com.cyr.ojbackendserviceclient.service.UserFeignClient;
+import com.cyr.ojbackendmodel.model.dto.question.*;
+import com.cyr.ojbackendmodel.model.dto.questionsubmit.QuestionSubmitAddRequest;
+import com.cyr.ojbackendmodel.model.dto.questionsubmit.QuestionSubmitQueryRequest;
+import com.cyr.ojbackendmodel.model.entity.Question;
+import com.cyr.ojbackendmodel.model.entity.QuestionSubmit;
+import com.cyr.ojbackendmodel.model.entity.User;
+import com.cyr.ojbackendmodel.model.vo.QuestionSubmitVO;
+import com.cyr.ojbackendmodel.model.vo.QuestionVO;
+import com.cyr.ojbackendquestionservice.service.QuestionService;
+import com.cyr.ojbackendquestionservice.service.QuestionSubmitService;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -39,7 +36,7 @@ import java.util.List;
  * 
  */
 @RestController
-@RequestMapping("/question")
+@RequestMapping("/")
 @Slf4j
 public class QuestionController {
 
@@ -47,7 +44,7 @@ public class QuestionController {
     private QuestionService questionService;
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
     private final static Gson GSON = new Gson();
 
@@ -81,7 +78,7 @@ public class QuestionController {
         }
 
         questionService.validQuestion(question, true);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         question.setUserId(loginUser.getId());
         question.setFavourNum(0);
         question.setThumbNum(0);
@@ -103,13 +100,13 @@ public class QuestionController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userFeignClient.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldQuestion.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldQuestion.getUserId().equals(user.getId()) && !userFeignClient.isAdmin(user)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = questionService.removeById(id);
@@ -150,6 +147,29 @@ public class QuestionController {
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         boolean result = questionService.updateById(question);
         return ResultUtils.success(result);
+    }
+
+    /**
+     * 根据 id 获取
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/get")
+    public BaseResponse<Question> getQuestionById(long id, HttpServletRequest request) {
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Question question = questionService.getById(id);
+        if (question == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        User loginUser = userFeignClient.getLoginUser(request);
+        // 不是本人或管理员，不能直接获取所有信息
+        if (!question.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        return ResultUtils.success(question);
     }
 
     /**
@@ -202,7 +222,7 @@ public class QuestionController {
         if (questionQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         questionQueryRequest.setUserId(loginUser.getId());
         long current = questionQueryRequest.getCurrent();
         long size = questionQueryRequest.getPageSize();
@@ -261,13 +281,13 @@ public class QuestionController {
         }
         // 参数校验
         questionService.validQuestion(question, false);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         long id = questionEditRequest.getId();
         // 判断是否存在
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可编辑
-        if (!oldQuestion.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!oldQuestion.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = questionService.updateById(question);
@@ -292,7 +312,7 @@ public class QuestionController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 登录才能
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         long result = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
         return ResultUtils.success(result);
     }
@@ -310,7 +330,7 @@ public class QuestionController {
                                                                          HttpServletRequest request) {
         long current = questionSubmitQueryRequest.getCurrent();
         long size = questionSubmitQueryRequest.getPageSize();
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size),
                 questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
         return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionSubmitPage, loginUser));

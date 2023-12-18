@@ -214,7 +214,7 @@ questionSubmitAddRequest: QuestionSubmitAddRequest,
         return __request(OpenAPI, {
             method: 'POST',
             // url: '/api/question/question_submit/do',
-            url: '/api/question_submit/do',
+            url: '/api/question/question_submit/do',
             body: questionSubmitAddRequest,
             errors: {
                 401: `Unauthorized`,
