@@ -3,6 +3,7 @@ package com.cyr.ojbackenduserservice.controller.inner;
 import com.cyr.ojbackendserviceclient.service.UserFeignClient;
 import com.cyr.ojbackendmodel.model.entity.User;
 import com.cyr.ojbackenduserservice.service.UserService;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +25,7 @@ public class UserInnerController implements UserFeignClient {
 
 	@Resource
 	private UserService userService;
+
 	/**
 	 * @description 根据 id 获取用户
 	 * @param userId

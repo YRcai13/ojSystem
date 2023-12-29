@@ -7,6 +7,7 @@ import com.cyr.ojbackendcommon.common.ErrorCode;
 import com.cyr.ojbackendcommon.constant.CommonConstant;
 import com.cyr.ojbackendcommon.exception.BusinessException;
 import com.cyr.ojbackendcommon.utils.SqlUtils;
+import com.cyr.ojbackendquestionservice.rabbitmq.MyMessageProducer;
 import com.cyr.ojbackendserviceclient.service.JudgeFeignClient;
 import com.cyr.ojbackendserviceclient.service.UserFeignClient;
 import com.cyr.ojbackendmodel.model.dto.questionsubmit.QuestionSubmitAddRequest;
@@ -50,6 +51,9 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
 	@Lazy
 	private JudgeFeignClient judgeFeignClient;
 
+	@Resource
+	private MyMessageProducer myMessageProducer;
+
 	/**
 	 * 提交题目
 	 *
@@ -87,10 +91,14 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
 			throw new BusinessException(ErrorCode.SYSTEM_ERROR, "数据插入失败");
 		}
 		Long questionSubmitId = questionSubmit.getId();
+
+		// 发送消息
+		myMessageProducer.sendMessage("code_exchange", "my_routingKey", String.valueOf(questionSubmitId));
+
 		// 执行判题服务
-		CompletableFuture.runAsync(() -> {
-			judgeFeignClient.doJudge(questionSubmitId);
-		});
+//		CompletableFuture.runAsync(() -> {
+//			judgeFeignClient.doJudge(questionSubmitId);
+//		});
 		return questionSubmitId;
 	}
 

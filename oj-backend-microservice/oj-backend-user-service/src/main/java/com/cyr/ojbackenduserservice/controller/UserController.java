@@ -17,12 +17,16 @@ import com.cyr.ojbackenduserservice.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.List;
+
+import static com.cyr.ojbackendcommon.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 用户接口
@@ -38,6 +42,14 @@ public class UserController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private RedisTemplate<String, String> redisTemplate;
+
+    @GetMapping("/testRedis")
+    public String test() {
+        Long l = redisTemplate.opsForSet().add("cyr111", "99999");
+        return "";
+    }
 
     // region 登录相关
 
@@ -83,6 +95,19 @@ public class UserController {
         return ResultUtils.success(loginUserVO);
     }
 
+    /**
+     * @description 获取session
+     * @param request
+     * @return
+     * @author
+     * @date 2023/12/29 14:35
+    */
+    @GetMapping("/getSessionAttribute")
+    public String getSessionAttribute(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Object attribute = session.getAttribute(USER_LOGIN_STATE);
+        return attribute.toString();
+    }
 
     /**
      * 用户注销

@@ -1,6 +1,6 @@
 package com.cyr.ojbackendjudgeservice;
 
-import org.mybatis.spring.annotation.MapperScan;
+import com.cyr.ojbackendjudgeservice.rabbitmq.InitRabbitMq;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
@@ -24,6 +24,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableFeignClients(basePackages = {"com.cyr.ojbackendserviceclient.service"})
 public class OjBackendJudgeServiceApplication {
 	public static void main(String[] args) {
+		InitRabbitMq.doInit();
 		SpringApplication.run(OjBackendJudgeServiceApplication.class, args);
 	}
 

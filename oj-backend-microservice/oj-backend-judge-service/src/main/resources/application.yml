@@ -14,9 +14,9 @@ spring:
   # session 配置
   session:
     # todo 取消注释开启分布式 session（须先配置 Redis）
-    # store-type: redis
+     store-type: redis
     # 30 天过期
-    timeout: 2592000
+     timeout: 2592000
   # 数据库配置
   # todo 需替换配置
   datasource:
@@ -26,12 +26,11 @@ spring:
     password: 123456
   # Redis 配置
   # todo 需替换配置，然后取消注释
-#  redis:
-#    database: 1
-#    host: localhost
-#    port: 6379
-#    timeout: 5000
-#    password: 123456
+  redis:
+    database: 1
+    host: localhost
+    port: 6379
+    timeout: 5000
   # Elasticsearch 配置
   # todo 需替换配置，然后取消注释
   # 文件上传
@@ -43,6 +42,11 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+  rabbitmq:
+    host: localhost
+    port: 5672
+    password: guest
+    username: guest
 server:
   address: 0.0.0.0
   port: 8104
@@ -52,6 +56,7 @@ server:
     session:
       cookie:
         max-age: 2592000
+        path: /api
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -64,3 +69,5 @@ mybatis-plus:
 # 代码沙箱配置
 codesandbox:
   type: remote
+knife4j:
+  enable: true

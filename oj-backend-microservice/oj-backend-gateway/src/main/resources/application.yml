@@ -3,3 +3,33 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+    gateway:
+      routes:
+        - id: oj-backend-user-service
+          uri: lb://oj-backend-user-service
+          predicates:
+            - Path=/api/user/**
+        - id: oj-backend-question-service
+          uri: lb://oj-backend-question-service
+          predicates:
+            - Path=/api/question/**
+        - id: oj-backend-judge-service
+          uri: lb://oj-backend-judge-service
+          predicates:
+            - Path=/api/judge/**
+  application:
+    name: oj-backend-gateway
+  main:
+    web-application-type: reactive
+server:
+  port: 8101
+knife4j:
+  gateway:
+    enabled: true
+    # 指定服务发现的模式聚合微服务文档，并且是默认`default`分组
+    strategy: discover
+    discover:
+      enabled: true
+      # 指定版本号(Swagger2|OpenAPI3)
+      version : swagger2
+      # 需要排除的微服务(eg:网关服务)
